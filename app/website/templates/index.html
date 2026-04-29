@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>DogCat</title>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <h1>Кошка или собака</h1>
+            <h2>Выберите изображение для загрузки</h2>
+            <form id="uploadForm">
+                <input type="file" name="image" id="imageInput" accept="image/*" required>
+            </form>
+            <div id="preview"></div>
+            <div id="message"></div>
+            <form id="determineForm">
+                <button type="submit">Определить</button>
+            </form>
+            <h2>Результат оценки</h2>
+            <div class="predicted_text">
+                <h1></h1>
+            </div>
+        </form>
+        </div>
+
+        <div class="sidebar">
+            <h2>Текущая модель</h2>
+            <div id="modelInfo">Загрузка информации о модели...</div>
+            <form id="uploadFolder">
+                <input type="file" id="folderInput" webkitdirectory multiple>
+                <button type="submit">Отправить</button>
+            </form>
+            <div id="uploadMessage"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
