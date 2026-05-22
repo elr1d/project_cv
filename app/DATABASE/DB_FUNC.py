@@ -87,11 +87,11 @@ def is_file_used(path,conn = None):
         if close_after:
             conn.close()
             
-def add_model(model_path,accuracy, conn = None):
+def add_model(model_path,val_accuracy,test_acc, conn = None):
     conn, close_after = get_connection(conn)
     try:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO model_data (model_path, accuracy) VALUES (?, ?)", (str(model_path), accuracy))
+        cursor.execute("INSERT INTO model_data (model_path, val_accuracy, test_accuracy) VALUES (?, ?, ?)", (str(model_path), val_accuracy, test_acc))
         if close_after:
             conn.commit()
     finally:

@@ -2,7 +2,6 @@ from flask import Flask, request, render_template, url_for, send_from_directory,
 from pathlib import Path
 from app.DATABASE.DB_FUNC import check_duplicate, save_files_to_db_and_folder_transactioned,get_unused_count
 from app.DATABASE.DB_CREATE import init_db
-from app.train.fine_tune import uploaded_model_tune
 from app.website.model_manager import ModelManager
 import uuid
 import hashlib
@@ -11,7 +10,7 @@ import threading
 import os
 import secrets
 app = Flask(__name__)
-
+init_db()
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 BASE_DIR = Path(__file__).parent
 UPLOAD_FOLDER = BASE_DIR / 'images'
@@ -65,7 +64,7 @@ def determine():
         return jsonify({'error' : 'Файл изображения не найден'}),500
     try:
         predicted_class, confidence = model_manager.predict(image_path)
-        return jsonify({'result': f'Это { 'Собака' if predicted_class else 'Кот'}, \nуверенность: {int(confidence*100)}%'})
+        return jsonify({'result': f'Это {model_manager.get_classes_list()[predicted_class]}, \nуверенность: {int(confidence*100)}%'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -86,7 +85,7 @@ def upload_to_server():
     
     if not files:
         return jsonify({'error': 'Файлы не выбраны'}), 400
-    
+    classes = model_manager.get_classes_list()
     for file in files:
         if file.filename == '':
             return jsonify({'error': 'Файл не выбран'}), 400
@@ -107,14 +106,19 @@ def upload_to_server():
             original_name = path_names[-1]
         else:
             original_name = path_names[0]
-            if not original_name.startswith('cat') and not original_name.startswith('dog'):
+            class_name = None
+            
+            for cls in classes:
+                if original_name.startswith(cls):
+                    class_name = cls
+                    break
+            if class_name is None:
                 return jsonify({'error': 'Некорректное имя файла'}), 400
-            class_name = 'cats' if original_name.startswith('cat') else 'dogs'
 
         if not check_extension(file.filename):
             return jsonify({'error': 'Некорректное расширение файла'}), 400
 
-        if class_name.lower() not in ('cats', 'dogs'):
+        if class_name.lower() not in classes:
             return jsonify({'error': 'Некорректный класс'}), 400
 
         extension = original_name.rsplit('.', 1)[1].lower()
@@ -132,7 +136,7 @@ def upload_to_server():
     if get_unused_count() >= AMOUNT_TO_RETRAIN:
         threading.Thread(
             target=uploaded_model_tune_and_update,
-            args=(model_manager.model_path,),   
+            args=(),   
             daemon=True
         ).start()
     return jsonify({
@@ -141,8 +145,8 @@ def upload_to_server():
         'class': class_count
     })
 
-def uploaded_model_tune_and_update(checkpoint_path):
-    result = uploaded_model_tune(checkpoint_path)
+def uploaded_model_tune_and_update():
+    result = model_manager.model_tune()
     if result:
         change_model()
 def compute_file_hash(data):

@@ -23,6 +23,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         model_path TEXT UNIQUE NOT NULL,
         added_at DATE DEFAULT (datetime('now', 'localtime')),
-        accuracy FLOAT NOT NULL
+        val_accuracy FLOAT NOT NULL,
+        test_accuracy FLOAT NOT NULL
     )
                     """)

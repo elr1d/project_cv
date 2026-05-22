@@ -7,7 +7,7 @@ wheels/
 *.egg-info
 .env*
 *.env
-data/test_set
-data/training_set
+app/data/**/*
+!app/data/**/.gitkeep
 # Virtual environments
 .venv

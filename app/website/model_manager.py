@@ -2,6 +2,7 @@ import torch
 from torchvision import models, transforms
 from PIL import Image
 from app.DATABASE.DB_FUNC import get_newest_model_path,get_model_date
+from app.train.fine_tune import uploaded_model_tune
 class ModelManager:
     def __init__(self):
         self.TRANSFORM = transforms.Compose([
@@ -11,14 +12,18 @@ class ModelManager:
         ])
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = models.efficientnet_v2_s(weights = None)
-        self.num_classes = 2
+        self.num_classes = 6
         self.model.classifier[1] = torch.nn.Linear(self.model.classifier[1].in_features, self.num_classes)
         self.model_path = None
         self.checkpoint = None
+        self.class_to_idx = {'cardboard': 0, 'glass': 1, 'metal': 2, 'paper': 3, 'plastic': 4, 'trash': 5}
+        self.classes_list = []
     def get_model_info(self):
-        return f'Модель: efficientnet_v2_s Версия: {get_model_date(self.model_path)} Точность: {self.checkpoint['best_acc']:.2f}%'
+        return f'Модель: efficientnet_v2_s Версия: {get_model_date(self.model_path)} Точность: {self.checkpoint['test_acc']:.2f}%'
     def get_model(self):
         return self.model
+    def get_classes_list(self):
+        return self.classes_list
     
     def load_last_model(self):
         self.model_path = get_newest_model_path()
@@ -26,6 +31,8 @@ class ModelManager:
         self.model.load_state_dict(self.checkpoint['model_state_dict'])
         self.model.to(self.device)
         self.model.eval()
+        self.class_to_idx = self.checkpoint['class_to_idx']
+        self.classes_list = list(self.class_to_idx.keys())
         
     def predict(self,image_path):
         image = Image.open(image_path).convert('RGB')
@@ -39,5 +46,6 @@ class ModelManager:
         confidence = confidence.item()
         print(f'Предсказанный класс: {predicted_class}, уверенность: {confidence}')
         return predicted_class, confidence
-    
+    def model_tune(self):
+        return uploaded_model_tune(self.model_path)
     
