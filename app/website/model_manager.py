@@ -3,6 +3,8 @@ from torchvision import models, transforms
 from PIL import Image
 from app.DATABASE.DB_FUNC import get_newest_model_path,get_model_date
 from app.train.fine_tune import uploaded_model_tune
+import glob
+import os
 class ModelManager:
     def __init__(self):
         self.TRANSFORM = transforms.Compose([
@@ -19,7 +21,7 @@ class ModelManager:
         self.class_to_idx = {'cardboard': 0, 'glass': 1, 'metal': 2, 'paper': 3, 'plastic': 4, 'trash': 5}
         self.classes_list = []
     def get_model_info(self):
-        return f'Модель: efficientnet_v2_s Версия: {get_model_date(self.model_path)} Точность: {self.checkpoint['test_acc']:.2f}%'
+        return f'Модель: efficientnet_v2_s Версия: {get_model_date(self.model_path) } Точность: {self.checkpoint['test_acc']:.2f}%'
     def get_model(self):
         return self.model
     def get_classes_list(self):
@@ -27,6 +29,13 @@ class ModelManager:
     
     def load_last_model(self):
         self.model_path = get_newest_model_path()
+        if self.model_path is None:
+            model_dir = 'app/data/trained_model/'
+            pth_files = glob.glob(os.path.join(model_dir, '*.pth'))
+            if pth_files:
+                self.model_path = pth_files[0]
+            else:
+                raise FileNotFoundError(f"Модель не найдена в {model_dir}")
         self.checkpoint = torch.load(self.model_path)
         self.model.load_state_dict(self.checkpoint['model_state_dict'])
         self.model.to(self.device)
