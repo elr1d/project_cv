@@ -16,11 +16,11 @@
 
 ## 🛠️ Технологии
 
-**Backend** Flask, sqlite3
-**ML модель** EfficientNetV2_s, PyTorch
-**Обработка изображений** torchvision
-**Фронтенд** HTML, CSS, bootstrap
-**Инструменты** Python 3.11+, uv, Git
+- **Backend** Flask, sqlite3
+- **ML модель** EfficientNetV2_s, PyTorch
+- **Обработка изображений** torchvision
+- **Фронтенд** HTML, CSS, bootstrap
+- **Инструменты** Python 3.11+, uv, Git
 
 
 ## ⚡ Быстрый старт
@@ -75,7 +75,7 @@
 
 Аугментация данных: повороты, горизонтальное отражение.
 
-**Качество модели**: Точность: 92.26% на тестовой выборке
+**Качество модели**: Точность: 92% на тестовой выборке
 
 ## 🔄 Автоматическое дообучение 
 
@@ -150,7 +150,7 @@ project_cv/
 
 GitHub: https://github.com/elr1d
 
-Email: [h4rons@yandex.ru]
+Email: h4rons@yandex.ru
 
 
 ### 🙏 Благодарности
